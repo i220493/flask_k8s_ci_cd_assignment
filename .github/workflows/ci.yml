@@ -2,36 +2,38 @@ name: CI Pipeline
 
 on:
   push:
-    branches: ["*"]   # triggers on any branch
-  pull_request:
-    branches: ["*"]
+    branches:
+      - "*"
 
 jobs:
-  build-test:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8 pytest
 
-      - name: Run flake8 Linting (max line length = 90)
-        run: |
-          flake8 --max-line-length=90 .
+      - name: Add project root to PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
-      - name: Run Pytest
+      - name: Run Flake8 Linting
         run: |
-          pytest
+          flake8 . --ignore=E203,W503
 
-      - name: Build Docker image
+      - name: Run Pytest Tests
         run: |
-          docker build -t flask-app .
+          pytest -v
+
+      - name: Build Docker Image
+        run: |
+          docker build -t flask-k8s-app .
