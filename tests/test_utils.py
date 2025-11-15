@@ -1,4 +1,4 @@
-from flask_k8s_ci_cd_assignment.utils import add_numbers
+from utils import add_numbers
 
 
 def test_add_numbers():
