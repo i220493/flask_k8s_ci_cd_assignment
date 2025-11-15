@@ -1,23 +1,50 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "flask-app"
+        KUBE_NAMESPACE = "default"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Build Docker Image') {
             steps {
-                git branch: 'develop', url: 'https://github.com/i220493/flask-k8s-ci-cd-assignment.git'
+                script {
+                    sh 'docker build -t ${IMAGE_NAME}:latest .'
+                }
             }
         }
 
-        stage('Build Docker image') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'docker build -t flask-app .'
+                script {
+                    sh '''
+                    kubectl apply -f kubernetes/deployment.yaml
+                    kubectl apply -f kubernetes/service.yaml
+                    '''
+                }
             }
         }
 
-        stage('Run container') {
+        stage('Verify Deployment') {
             steps {
-                sh 'docker run -d -p 5000:5000 --name flask-app-container flask-app'
+                script {
+                    sh '''
+                    kubectl rollout status deployment/flask-app
+                    kubectl get pods
+                    kubectl get services
+                    '''
+                }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment to Kubernetes successful!"
+        }
+        failure {
+            echo "Deployment failed!"
         }
     }
 }
