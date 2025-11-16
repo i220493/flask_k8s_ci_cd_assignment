@@ -21,8 +21,7 @@ pipeline {
         stage('Load Image to Minikube') {
             steps {
                 script {
-                    // Save image and load into minikube
-                    sh "docker save ${DOCKER_IMAGE} | docker exec -i minikube docker load"
+                    sh 'docker save ${DOCKER_IMAGE} | docker exec -i minikube docker load'
                 }
             }
         }
@@ -42,6 +41,14 @@ pipeline {
                     sh "kubectl get svc flask-service"
                 }
             }
+        }
+    }
+    post {
+        success {
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Deployment failed!'
         }
     }
 }
