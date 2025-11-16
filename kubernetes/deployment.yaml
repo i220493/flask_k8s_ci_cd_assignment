@@ -1,34 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-app-deployment
-  labels:
-    app: flask-app
+  name: flask-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
       app: flask-app
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
   template:
     metadata:
       labels:
         app: flask-app
     spec:
       containers:
-        - name: flask-container
-          image: flask-k8s-app:latest
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 5000
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "250m"
-              memory: "256Mi"
+      - name: flask-app
+        image: flask-app:latest
+        imagePullPolicy: Never  # Critical!
+        ports:
+        - containerPort: 5000
