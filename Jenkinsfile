@@ -4,7 +4,10 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t flask-app:latest .'
+                sh '''
+                eval $(minikube docker-env)
+                docker build -t flask-app:latest .
+                '''
             }
         }
 
